@@ -160,7 +160,18 @@ class Game():
             and position) should be correctly updated.
         """
         NewSnakeCoordinates = self.calculateNewCoordinates()
-        #complete the method implementation below
+        self.snakeCoordinates.append(NewSnakeCoordinates) #check if the snake has captured the prey
+        if NewSnakeCoordinates == self.preyCoordinates:
+            self.score += 1
+            self.queue.put({"score": self.score})
+            self.createNewPrey()
+        else: #remove the last coordinate of the snake
+            del self.snakeCoordinates[0]
+        #check if the game is over
+        self.isGameOver(NewSnakeCoordinates)
+        #add a task to the queue for the new snake coordinates
+        self.queue.put({"move": self.snakeCoordinates})
+
 
 
     def calculateNewCoordinates(self) -> tuple:
@@ -173,7 +184,23 @@ class Game():
             It is used by the move() method.    
         """
         lastX, lastY = self.snakeCoordinates[-1]
-        #complete the method implementation below
+        if self.direction == "Left":
+            newX = lastX - SNAKE_ICON_WIDTH
+            newY = lastY
+        elif self.direction == "Right":
+            newX = lastX + SNAKE_ICON_WIDTH
+            newY = lastY
+        elif self.direction == "Up":
+            newX = lastX
+            newY = lastY - SNAKE_ICON_WIDTH
+        else:
+            newX = lastX
+            newY = lastY + SNAKE_ICON_WIDTH
+        #check if the new coordinates are valid
+        if newX < 0 or newX > WINDOW_WIDTH or newY < 0 or newY > WINDOW_HEIGHT:
+            self.gameNotOver = False
+        return (newX, newY)
+    
 
 
     def isGameOver(self, snakeCoordinates) -> None:
@@ -185,7 +212,18 @@ class Game():
             field and also adds a "game_over" task to the queue. 
         """
         x, y = snakeCoordinates
-        #complete the method implementation below
+        #check if the snake has passed any wall
+        if x < 0 or x > WINDOW_WIDTH or y < 0 or y > WINDOW_HEIGHT:
+            self.gameNotOver = False
+        #check if the snake has bit itself
+        for i in range(len(self.snakeCoordinates) - 1):
+            if snakeCoordinates == self.snakeCoordinates[i]:
+                self.gameNotOver = False
+        #add a task to the queue for game over
+        if not self.gameNotOver:
+            self.queue.put({"game_over": True})
+
+
 
     def createNewPrey(self) -> None:
         """ 
@@ -199,7 +237,13 @@ class Game():
             away from the walls. 
         """
         THRESHOLD = 15   #sets how close prey can be to borders
-        #complete the method implementation below
+        x = random.randint(THRESHOLD, WINDOW_WIDTH - THRESHOLD)
+        y = random.randint(THRESHOLD, WINDOW_HEIGHT - THRESHOLD)
+        #calculate the coordinates of the prey icon
+        preyCoordinates = (x - 5, y - 5, x + 5, y + 5) #replace 5 with a constant
+        self.preyCoordinates = preyCoordinates
+        #add a task to the queue for the new prey coordinates
+        self.queue.put({"prey": preyCoordinates})
 
 
 if __name__ == "__main__":
@@ -207,7 +251,9 @@ if __name__ == "__main__":
     WINDOW_WIDTH = 500           
     WINDOW_HEIGHT = 300 
     SNAKE_ICON_WIDTH = 15
-    #add the specified constant PREY_ICON_WIDTH here     
+    #add the specified constant PREY_ICON_WIDTH here 
+    # it should be the same as SNAKE_ICON_WIDTH
+    PREY_ICON_WIDTH = SNAKE_ICON_WIDTH    
 
     BACKGROUND_COLOUR = "green"   #you may change this colour if you wish
     ICON_COLOUR = "yellow"        #you may change this colour if you wish
@@ -221,7 +267,12 @@ if __name__ == "__main__":
     QueueHandler()  #instantiate the queue handler    
     
     #start a thread with the main loop of the game
-    threading.Thread(target = game.superloop, daemon=True).start()
 
+    threading.Thread(target = game.superloop, daemon=True).start()
+    #start a thread with the queue handler
+    threading.Thread(target = gui.QueueHandler, daemon=True).start()
+    #start a thread with the move method of the game
+    threading.Thread(target = game.move, daemon=True).start()
+   
     #start the GUI's own event loop
     gui.root.mainloop()
