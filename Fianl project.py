@@ -271,7 +271,7 @@ if __name__ == "__main__":
     threading.Thread(target = game.superloop, daemon=True).start()
     #start a thread with the queue handler
 
-    threading.Thread(target = QueueHandler.queueHandler, daemon=True).start()
+    threading.Thread(target = QueueHandler ,daemon=True).start()
     #start a thread with the snake movement method
     threading.Thread(target = game.move, daemon=True).start()
    
