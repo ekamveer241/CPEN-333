@@ -271,9 +271,23 @@ if __name__ == "__main__":
     threading.Thread(target = game.superloop, daemon=True).start()
     #start a thread with the queue handler
 
-    threading.Thread(target = QueueHandler ,daemon=True).start()
+    threading.Thread(target = QueueHandler.queueHandler ,daemon=True).start()
     #start a thread with the snake movement method
     threading.Thread(target = game.move, daemon=True).start()
+    #start a thread with the prey creation method
+    threading.Thread(target = game.createNewPrey, daemon=True).start()
+    #start a thread with the queue handler method
+    threading.Thread(target = QueueHandler.queueHandler, daemon=True).start()
+    #start a thread with the game over method
+    threading.Thread(target = game.isGameOver, daemon=True).start()
+    #start a thread with the arrow key method
+    threading.Thread(target = game.whenAnArrowKeyIsPressed, daemon=True).start()
+    #start a thread with the calculate new coordinates method
+    threading.Thread(target = game.calculateNewCoordinates, daemon=True).start()
+    #start a thread with the move method
+    threading.Thread(target = game.move, daemon=True).start()
+    #start a thread with the prey creation method
+    threading.Thread(target = game.createNewPrey, daemon=True).start()
    
     #start the GUI's own event loop
     gui.root.mainloop()
