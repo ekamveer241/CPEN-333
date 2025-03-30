@@ -1,5 +1,5 @@
-# Group#: B6
-# Student Names: EKamveer Singh, Nickolas Sebastialli
+# Group#:
+# Student Names:
 
 """
     This program implements a variety of the snake 
