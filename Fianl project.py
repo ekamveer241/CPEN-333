@@ -247,47 +247,23 @@ class Game():
 
 
 if __name__ == "__main__":
-    #some constants for our GUI
-    WINDOW_WIDTH = 500           
-    WINDOW_HEIGHT = 300 
+    # Constants
+    WINDOW_WIDTH = 500
+    WINDOW_HEIGHT = 300
     SNAKE_ICON_WIDTH = 15
-    #add the specified constant PREY_ICON_WIDTH here 
-    # it should be the same as SNAKE_ICON_WIDTH
-    PREY_ICON_WIDTH = SNAKE_ICON_WIDTH    
+    PREY_ICON_WIDTH = SNAKE_ICON_WIDTH
+    BACKGROUND_COLOUR = "green"
+    ICON_COLOUR = "yellow"
 
-    BACKGROUND_COLOUR = "green"   #you may change this colour if you wish
-    ICON_COLOUR = "yellow"        #you may change this colour if you wish
+    gameQueue = queue.Queue()
 
-    gameQueue = queue.Queue()     #instantiate a queue object using python's queue class
+    game = Game()
+    gui = Gui()
+    queue_handler = QueueHandler()
 
-    game = Game()        #instantiate the game object
+    # Start threads correctly
+    threading.Thread(target=game.superloop, daemon=True).start()
+    threading.Thread(target=queue_handler.queueHandler, daemon=True).start()
 
-    gui = Gui()    #instantiate the game user interface
-    
-    QueueHandler()  #instantiate the queue handler    
-    
-    #start a thread with the main loop of the game
-
-    threading.Thread(target = game.superloop, daemon=True).start()
-    #start a thread with the queue handler
-
-    threading.Thread(target = QueueHandler.queueHandler ,daemon=True).start()
-    #start a thread with the snake movement method
-    threading.Thread(target = game.move, daemon=True).start()
-    #start a thread with the prey creation method
-    threading.Thread(target = game.createNewPrey, daemon=True).start()
-    #start a thread with the queue handler method
-    threading.Thread(target = QueueHandler.queueHandler, daemon=True).start()
-    #start a thread with the game over method
-    threading.Thread(target = game.isGameOver, daemon=True).start()
-    #start a thread with the arrow key method
-    threading.Thread(target = game.whenAnArrowKeyIsPressed, daemon=True).start()
-    #start a thread with the calculate new coordinates method
-    threading.Thread(target = game.calculateNewCoordinates, daemon=True).start()
-    #start a thread with the move method
-    threading.Thread(target = game.move, daemon=True).start()
-    #start a thread with the prey creation method
-    threading.Thread(target = game.createNewPrey, daemon=True).start()
-   
-    #start the GUI's own event loop
+    # Start GUI event loop
     gui.root.mainloop()
